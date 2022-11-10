@@ -45,6 +45,7 @@ The body of the note
 #>
 Function New-Note
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification='Creating a note is non-destructive')]
     [CmdletBinding()]
     Param(
         [Parameter()]
@@ -157,6 +158,8 @@ The path to search under
 #>
 Function Get-Notes
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification='It gets multiple notes')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidAssignmentToAutomaticVariable', '', Justification='Call needs to be -This')]
     [CmdletBinding(DefaultParameterSetName='FromTo')]
     Param(
         [Parameter(ParameterSetName='Today')]
@@ -185,6 +188,11 @@ Function Get-Notes
     Switch ($PSCmdlet.ParameterSetName)
     {
         'Today' {
+            If (-not $Today)
+            {
+                Write-Error "Not today!"
+                Return
+            }
             $From = [DateTime]::Today
             $To = [DateTime]::MaxValue
         }
@@ -219,13 +227,13 @@ Function Get-Notes
         | Where-Object { $From -le $_.LastWriteTime -and $_.LastWriteTime -lt $To } `
         | ForEach-Object {
             $file = $_
-            Write-Host (Get-NoteName $file)
-            Write-Host
+            Write-Output (Get-NoteName $file)
+            Write-Output ''
 
             Get-Content -Path $file.FullName
 
-            Write-Host
-            Write-Host
+            Write-Output ''
+            Write-Output ''
         }
 }
 
@@ -249,6 +257,8 @@ The pattern to search for in the body of notes (regex)
 #>
 Function Find-Notes
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Justification='It gets multiple notes')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Search', Justification='False positive')]
     [CmdletBinding()]
     Param(
         [Parameter()]
@@ -273,14 +283,42 @@ Function Find-Notes
         } `
         | ForEach-Object {
             $file = $_
-            Write-Host (Get-NoteName $file)
-            Write-Host
+            Write-Output (Get-NoteName $file)
+            Write-Output ''
 
             Get-Content -Path $file.FullName
 
-            Write-Host
-            Write-Host
+            Write-Output ''
+            Write-Output ''
         }
+}
+
+<#
+.SYNOPSIS
+
+Edit the contents of a note
+
+.DESCRIPTION
+
+Edit the contents of a note
+
+.PARAMETER Path
+
+The path to the note to edit
+#>
+Function Edit-Note
+{
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory)]
+        [ArgumentCompleter({ Get-PathCompleter @args })]
+        [string]
+        $Path
+    )
+
+    If (-not $Path.EndsWith('.txt')) { $Path = "$Path.txt" }
+
+    code -w (Join-Path $SsnDirectory $Path)
 }
 
 <#

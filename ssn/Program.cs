@@ -11,6 +11,7 @@ var app = new AppCommand
     new GetCommand(root),
     new ListCommand(root),
     new SearchCommand(root),
+    new EditCommand(root),
     new MoveCommand(root),
 };
 

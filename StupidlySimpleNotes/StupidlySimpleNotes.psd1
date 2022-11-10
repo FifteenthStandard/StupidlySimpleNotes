@@ -12,7 +12,7 @@
 RootModule = 'StupidlySimpleNotes.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.0.1'
+ModuleVersion = '0.0.2'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -75,6 +75,7 @@ FunctionsToExport = @(
     'Get-Notes',
     'Find-Notes',
     'Move-Note',
+    'Edit-Note',
     'Get-PathCompleter'
 )
 
