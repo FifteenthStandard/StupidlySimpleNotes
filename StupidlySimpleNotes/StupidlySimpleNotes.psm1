@@ -26,44 +26,43 @@ arguments, or if omitted, the draft note will open in Visual Studio Code by
 default. Input from the pipeline will be appended to the bottom of the note,
 allowing you to easily capture the output of another command in a note.
 
+.PARAMETER Note
+
+The body of the note
+
 .PARAMETER Path
 
 The path for the note. If not supplied, the path will be automatically
 generated based on the current timestamp
 
-.PARAMETER InputObject
-
-Allows lines of text to be appended to the note from the pipeline
-
 .PARAMETER Edit
 
 Whether to edit the note in Visual Studio Code before saving
 
-.PARAMETER Note
+.PARAMETER InputObject
 
-The body of the note
+Allows lines of text to be appended to the note from the pipeline
 #>
 Function New-Note
 {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification='Creating a note is non-destructive')]
-    [CmdletBinding()]
-    Param(
+    [CmdletBinding()] Param(
+        [Parameter(Position=0, ValueFromRemainingArguments)]
+        [string]
+        $Note,
+
         [Parameter()]
         [ArgumentCompleter({ Get-PathCompleter @args })]
         [string]
         $Path,
 
-        [Parameter(ValueFromPipeline)]
-        [string]
-        $InputObject,
-
         [Parameter()]
         [switch]
         $Edit,
 
-        [Parameter(Position=0, ValueFromRemainingArguments)]
+        [Parameter(ValueFromPipeline)]
         [string]
-        $Note
+        $InputObject
     )
 
     Begin {
@@ -166,7 +165,7 @@ Function Get-Notes
         [switch]
         $Today,
 
-        [Parameter(Position=0, ParameterSetName='This')]
+        [Parameter(ParameterSetName='This')]
         [string]
         [ValidateSet('week', 'month', 'year')]
         $This,
@@ -247,13 +246,13 @@ Search for notes
 Search for notes (optionally under a given path) which match the given search
 pattern (regex)
 
-.PARAMETER Path
-
-The path to search under
-
 .PARAMETER Search
 
 The pattern to search for in the body of notes (regex)
+
+.PARAMETER Path
+
+The path to search under
 #>
 Function Find-Notes
 {
@@ -261,14 +260,14 @@ Function Find-Notes
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Search', Justification='False positive')]
     [CmdletBinding()]
     Param(
+        [Parameter(Position=0, Mandatory, ValueFromRemainingArguments)]
+        [string]
+        $Search,
+
         [Parameter()]
         [ArgumentCompleter({ Get-PathCompleter @args })]
         [string]
-        $Path,
-
-        [Parameter(Position=0, Mandatory, ValueFromRemainingArguments)]
-        [string]
-        $Search
+        $Path
     )
 
     $Path = Join-Path $SsnDirectory $Path
