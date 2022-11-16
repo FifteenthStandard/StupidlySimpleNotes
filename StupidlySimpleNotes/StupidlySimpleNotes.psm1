@@ -166,8 +166,8 @@ Function Get-Notes
         $Today,
 
         [Parameter(ParameterSetName='This')]
-        [string]
         [ValidateSet('week', 'month', 'year')]
+        [string]
         $This,
 
         [Parameter(ParameterSetName='FromTo')]
