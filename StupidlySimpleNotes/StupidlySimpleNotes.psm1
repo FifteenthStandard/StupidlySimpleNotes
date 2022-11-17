@@ -87,7 +87,7 @@ Function New-Note
         {
             $tmp = New-TemporaryFile
             $lines | Out-File -FilePath $tmp
-            code -w $tmp
+            Edit-Note $tmp
             Get-Content -Path $tmp | Out-File -FilePath $fullPath
         }
         Else
@@ -221,6 +221,7 @@ Function Get-Notes
 
     Get-ChildItem `
         -Path $Path `
+        -Include '*.txt' `
         -File `
         -Recurse `
         | Where-Object { $From -le $_.LastWriteTime -and $_.LastWriteTime -lt $To } `
@@ -316,8 +317,11 @@ Function Edit-Note
     )
 
     If (-not $Path.EndsWith('.txt')) { $Path = "$Path.txt" }
+    $fullPath = Join-Path $ssnDirectory $Path
 
-    code -w (Join-Path $SsnDirectory $Path)
+    $editor = Get-NoteEditor
+
+    Invoke-Expression "$editor `"$fullPath`""
 }
 
 <#
@@ -368,6 +372,59 @@ Function Move-Note
     }
 }
 
+<#
+.SYNOPSIS
+
+Get the default editor
+
+.DESCRIPTION
+
+Get the default editor used when creating or editing notes
+#>
+Function Get-NoteEditor
+{
+    [CmdletBinding()]
+    Param()
+
+    $editorPath = Join-Path $ssnDirectory ".editor"
+    If (Test-Path $editorPath)
+    {
+        Get-Content -Raw $editorPath
+    }
+    Else
+    {
+        "code --wait"
+    }
+}
+
+
+<#
+.SYNOPSIS
+
+Set the default editor
+
+.DESCRIPTION
+
+Set the default editor used when creating or editing notes
+
+.PARAMETER Command
+
+The command plus any arguments to execute to run the editor. Path will be appended automatically
+#>
+Function Set-NoteEditor
+{
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory)]
+        [string]
+        $Command
+    )
+
+    $editorPath = Join-Path $ssnDirectory ".editor"
+
+    $Command | Out-File -LiteralPath $editorPath -NoNewline
+}
+
 
 Function Get-PathCompleter
 {
@@ -375,7 +432,14 @@ Function Get-PathCompleter
 
     $fullPath = Join-Path $SsnDirectory $Path
 
-    Get-ChildItem -Path $fullPath | ForEach-Object {
+    $directory = [System.IO.Path]::GetDirectoryName($fullPath)
+    $filename = [System.IO.Path]::GetFileName($fullPath)
+
+    Get-ChildItem -Path $directory -Filter "$filename*" -Directory | ForEach-Object {
+        Get-NoteName $_
+    }
+
+    Get-ChildItem -Path "$directory/*" -Filter "$filename*" -Include '*.txt' | ForEach-Object {
         Get-NoteName $_
     }
 }
@@ -386,5 +450,16 @@ Function Get-NoteName
         $FilePath
     )
 
-    $FilePath.FullName.Substring($SsnDirectory.Length)
+    $FilePath = $FilePath.FullName
+
+    If ((Get-Item $FilePath) -is [System.IO.DirectoryInfo])
+    {
+        $FilePath = "$FilePath\"
+    }
+    ElseIf ($FilePath.EndsWith('.txt'))
+    {
+        $FilePath = $FilePath.Substring(0, $FilePath.Length - 4)
+    }
+
+    $FilePath.Substring($SsnDirectory.Length)
 }

@@ -15,8 +15,7 @@ public class EditCommand : Command
 
             var fullPath = Path.Join(root, path);
 
-            var proc = Process.Start("cmd.exe", $"/c code -w {fullPath}");
-            await proc.WaitForExitAsync();
+            await Editor.Edit(fullPath);
         }, path);
     }
 }

@@ -5,6 +5,8 @@ var root = Path.Join(
     "ssn"
 );
 
+Editor.Root = root;
+
 var app = new AppCommand
 {
     new NewCommand(root),
@@ -13,6 +15,7 @@ var app = new AppCommand
     new SearchCommand(root),
     new EditCommand(root),
     new MoveCommand(root),
+    new EditorCommand(),
 };
 
 return await app.InvokeAsync(args);

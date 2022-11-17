@@ -45,8 +45,7 @@ public class NewCommand : Command
             {
                 var tmp = Path.GetTempFileName();
                 await File.WriteAllTextAsync(tmp, body.ToString());
-                var proc = Process.Start("cmd.exe", $"/c code -w {tmp}");
-                await proc.WaitForExitAsync();
+                await Editor.Edit(tmp);
                 File.Copy(tmp, fullPath, true);
             }
             else
