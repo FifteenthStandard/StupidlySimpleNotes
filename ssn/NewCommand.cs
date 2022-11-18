@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text;
 
 public class NewCommand : Command
@@ -6,15 +5,15 @@ public class NewCommand : Command
     public NewCommand(string root)
         : base("new", "Create a new note")
     {
+        var note = new Argument<string[]>("note", "The body of the note");
         var path = new Option<string>("--path", "The path for the note");
         var edit = new Option<bool>("--edit", "Edit the note before saving");
-        var note = new Argument<string[]>("note", "The body of the note");
 
+        this.Add(note);
         this.Add(path);
         this.Add(edit);
-        this.Add(note);
 
-        this.SetHandler(async (path, edit, note) =>
+        this.SetHandler(async (note, path, edit) =>
         {
             if (string.IsNullOrWhiteSpace(path))
             {
@@ -52,6 +51,6 @@ public class NewCommand : Command
             {
                 await File.WriteAllTextAsync(fullPath, body.ToString());
             }
-        }, path, edit, note);
+        }, note, path, edit);
     }
 }

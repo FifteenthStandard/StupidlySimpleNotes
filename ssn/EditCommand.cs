@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 public class EditCommand : Command
 {
     public EditCommand(string root)

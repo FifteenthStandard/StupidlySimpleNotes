@@ -5,13 +5,16 @@ public class SearchCommand : Command
     public SearchCommand(string root)
         : base("search", "Search for notes")
     {
+        var search = new Argument<string[]>("search", "The pattern to search for")
+        {
+            Arity = ArgumentArity.OneOrMore
+        };
         var path = new Option<string>("--path", "The path to search under");
-        var search = new Argument<string[]>("search", "The pattern to search for");
 
-        this.Add(path);
         this.Add(search);
+        this.Add(path);
 
-        this.SetHandler(async (path, search) =>
+        this.SetHandler(async (search, path) =>
         {
             var fullPath = Path.Join(root, path ?? "");
 
@@ -42,6 +45,6 @@ public class SearchCommand : Command
                     }
                 }
             }
-        }, path, search);
+        }, search, path);
     }
 }
