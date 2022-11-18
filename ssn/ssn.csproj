@@ -5,11 +5,20 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <version>1.0.3</version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' != 'Pack'">
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishReadyToRun>true</PublishReadyToRun>
-    <version>1.0.2</version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Pack'">
+    <PackAsTool>true</PackAsTool>
+    <PackageId>StupidlySimpleNotes</PackageId>
+    <ToolCommandName>ssn</ToolCommandName>
   </PropertyGroup>
 
   <ItemGroup>
