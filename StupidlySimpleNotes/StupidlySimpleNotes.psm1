@@ -87,7 +87,7 @@ Function New-Note
         {
             $tmp = New-TemporaryFile
             $lines | Out-File -FilePath $tmp
-            Edit-Note $tmp
+            Edit-NoteInternal $tmp
             Get-Content -Path $tmp | Out-File -FilePath $fullPath
         }
         Else
@@ -319,9 +319,7 @@ Function Edit-Note
     If (-not $Path.EndsWith('.txt')) { $Path = "$Path.txt" }
     $fullPath = Join-Path $ssnDirectory $Path
 
-    $editor = Get-NoteEditor
-
-    Invoke-Expression "$editor `"$fullPath`""
+    Edit-NoteInternal $fullPath
 }
 
 <#
@@ -425,6 +423,45 @@ Function Set-NoteEditor
     $Command | Out-File -LiteralPath $editorPath -NoNewline
 }
 
+Function Confirm-Notes
+{
+    $date = [DateTime]::Today
+    $from = $date.AddDays(-6-$date.DayOfWeek)
+
+    Get-ChildItem `
+        -Path $SsnDirectory `
+        -Include '*.txt' `
+        -File `
+        -Recurse `
+        | Where-Object { $from -le $_.LastWriteTime } `
+        | ForEach-Object {
+            $file = $_
+            Write-Output (Get-NoteName $file)
+            Write-Output ''
+
+            Get-Content -Path $file.FullName | more
+
+            Write-Output ''
+            Write-Output ''
+
+            # $choice = [System.Management.Automation.Host.ChoiceDescription]
+
+            $opts = @(
+                # $choice::new("s", "Skip"),
+                # $choice::new("m", "Move")
+                '&Skip',
+                '&Move',
+                '&Edit'
+            )
+            $selection = $Host.UI.PromptForChoice(
+                "Action",
+                "Please select action",
+                $opts, 0
+            )
+            write-host $selection
+        }
+}
+
 
 Function Get-PathCompleter
 {
@@ -462,4 +499,15 @@ Function Get-NoteName
     }
 
     $FilePath.Substring($SsnDirectory.Length)
+}
+
+Function Edit-NoteInternal
+{
+    Param(
+        $FilePath
+    )
+
+    $editor = Get-NoteEditor
+
+    Invoke-Expression "$editor `"$FilePath`""
 }
