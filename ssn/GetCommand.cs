@@ -9,7 +9,7 @@ public class GetCommand : Command
 
         this.SetHandler(async (path) =>
         {
-            if (!path.EndsWith(".txt")) path = $"{path}.txt";
+            if (!path.EndsWith(".md")) path = $"{path}.md";
 
             var fullPath = Path.Join(root, path);
 

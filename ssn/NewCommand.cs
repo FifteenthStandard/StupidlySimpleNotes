@@ -15,13 +15,13 @@ public class NewCommand : Command
 
         this.SetHandler(async (note, path, edit) =>
         {
-            if (string.IsNullOrWhiteSpace(path))
+            if (string.IsNullOrWhiteSpace(path) || path.EndsWith("\\") || path.EndsWith("/"))
             {
                 var ticks = (DateTime.MaxValue - DateTime.Now).Ticks;
-                path = $"{ticks}.txt";
+                path = $"{path}{ticks}.md";
             }
 
-            if (!path.EndsWith(".txt")) path = $"{path}.txt";
+            if (!path.EndsWith(".md")) path = $"{path}.md";
 
             var fullPath = Path.Join(root, path);
             Directory.CreateDirectory(Path.GetDirectoryName(fullPath) ?? "");

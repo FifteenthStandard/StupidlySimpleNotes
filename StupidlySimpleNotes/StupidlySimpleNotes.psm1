@@ -12,6 +12,7 @@ create, display and search notes, right from your PowerShell terminal.
 
 
 $SsnDirectory = (Resolve-Path '~/ssn').Path
+$NoteExtension = $NoteExtension
 
 
 <#
@@ -71,13 +72,13 @@ Function New-Note
     }
     Process { $lines += $InputObject }
     End {
-        If ([string]::IsNullOrWhiteSpace($Path))
+        If ([string]::IsNullOrWhiteSpace($Path) -or $Path.EndsWith('\') -or $Path.EndsWith('/'))
         {
             $ticks = ([DateTime]::MaxValue - [DateTime]::Now).Ticks
-            $Path = "$ticks.txt"
+            $Path = "$Path$ticks$NoteExtension"
         }
 
-        If (-not $Path.EndsWith('.txt')) { $Path = "$Path.txt" }
+        If (-not $Path.EndsWith($NoteExtension)) { $Path = "$Path$NoteExtension" }
 
         $fullPath = Join-Path $SsnDirectory $Path
         $directory = [System.IO.Path]::GetDirectoryName($fullPath)
@@ -120,7 +121,7 @@ Function Get-Note
         $Path
     )
 
-    If (-not $Path.EndsWith('.txt')) { $Path = "$Path.txt" }
+    If (-not $Path.EndsWith($NoteExtension)) { $Path = "$Path$NoteExtension" }
 
     Get-Content -Path (Join-Path $SsnDirectory $Path)
 }
@@ -221,7 +222,7 @@ Function Get-Notes
 
     Get-ChildItem `
         -Path $Path `
-        -Include '*.txt' `
+        -Include '*$NoteExtension' `
         -File `
         -Recurse `
         | Where-Object { $From -le $_.LastWriteTime -and $_.LastWriteTime -lt $To } `
@@ -316,7 +317,7 @@ Function Edit-Note
         $Path
     )
 
-    If (-not $Path.EndsWith('.txt')) { $Path = "$Path.txt" }
+    If (-not $Path.EndsWith($NoteExtension)) { $Path = "$Path$NoteExtension" }
     $fullPath = Join-Path $ssnDirectory $Path
 
     Edit-NoteInternal $fullPath
@@ -355,8 +356,8 @@ Function Move-Note
         $Destination
     )
 
-    If (-not $Path.EndsWith('.txt')) { $Path = "$Path.txt" }
-    If (-not $Destination.EndsWith('.txt')) { $Destination = "$Destination.txt" }
+    If (-not $Path.EndsWith($NoteExtension)) { $Path = "$Path$NoteExtension" }
+    If (-not $Destination.EndsWith($NoteExtension)) { $Destination = "$Destination$NoteExtension" }
 
     If ($PSCmdlet.ShouldProcess(
         "Performing the operation `"Move Note`" on target `"Item: $Path Destination: $Destination`"",
@@ -430,7 +431,7 @@ Function Confirm-Notes
 
     Get-ChildItem `
         -Path $SsnDirectory `
-        -Include '*.txt' `
+        -Include '*$NoteExtension' `
         -File `
         -Recurse `
         | Where-Object { $from -le $_.LastWriteTime } `
@@ -476,7 +477,7 @@ Function Get-PathCompleter
         Get-NoteName $_
     }
 
-    Get-ChildItem -Path "$directory/*" -Filter "$filename*" -Include '*.txt' | ForEach-Object {
+    Get-ChildItem -Path "$directory/*" -Filter "$filename*" -Include '*$NoteExtension' | ForEach-Object {
         Get-NoteName $_
     }
 }
@@ -493,9 +494,9 @@ Function Get-NoteName
     {
         $FilePath = "$FilePath\"
     }
-    ElseIf ($FilePath.EndsWith('.txt'))
+    ElseIf ($FilePath.EndsWith($NoteExtension))
     {
-        $FilePath = $FilePath.Substring(0, $FilePath.Length - 4)
+        $FilePath = $FilePath.Substring(0, $FilePath.Length - $NoteExtension.Length)
     }
 
     $FilePath.Substring($SsnDirectory.Length)

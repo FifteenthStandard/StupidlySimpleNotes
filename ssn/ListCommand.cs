@@ -22,7 +22,7 @@ public class ListCommand : Command
         {
             var fullPath = Path.Join(root, path ?? "");
 
-            var files = Directory.GetFiles(fullPath, "*.txt", new EnumerationOptions
+            var files = Directory.GetFiles(fullPath, "*.md", new EnumerationOptions
             {
                 RecurseSubdirectories = true
             });

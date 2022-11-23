@@ -11,8 +11,8 @@ public class MoveCommand : Command
 
         this.SetHandler((path, destination) =>
         {
-            if (!path.EndsWith(".txt")) path = $"{path}.txt";
-            if (!destination.EndsWith(".txt")) destination = $"{destination}.txt";
+            if (!path.EndsWith(".md")) path = $"{path}.md";
+            if (!destination.EndsWith(".md")) destination = $"{destination}.md";
 
             var fullPath = Path.Join(root, path);
 
