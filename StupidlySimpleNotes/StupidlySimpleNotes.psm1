@@ -12,7 +12,7 @@ create, display and search notes, right from your PowerShell terminal.
 
 
 $SsnDirectory = (Resolve-Path '~/ssn').Path
-$NoteExtension = $NoteExtension
+$NoteExtension = '.md'
 
 
 <#
@@ -222,7 +222,7 @@ Function Get-Notes
 
     Get-ChildItem `
         -Path $Path `
-        -Include '*$NoteExtension' `
+        -Include "*$NoteExtension" `
         -File `
         -Recurse `
         | Where-Object { $From -le $_.LastWriteTime -and $_.LastWriteTime -lt $To } `
@@ -431,7 +431,7 @@ Function Confirm-Notes
 
     Get-ChildItem `
         -Path $SsnDirectory `
-        -Include '*$NoteExtension' `
+        -Include "*$NoteExtension" `
         -File `
         -Recurse `
         | Where-Object { $from -le $_.LastWriteTime } `
@@ -477,7 +477,7 @@ Function Get-PathCompleter
         Get-NoteName $_
     }
 
-    Get-ChildItem -Path "$directory/*" -Filter "$filename*" -Include '*$NoteExtension' | ForEach-Object {
+    Get-ChildItem -Path "$directory/*" -Filter "$filename*" -Include "*$NoteExtension" | ForEach-Object {
         Get-NoteName $_
     }
 }
